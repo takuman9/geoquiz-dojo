@@ -50,6 +50,9 @@ function normalize(s) {
     .replace(/[\s　・･.'’\-‐–—()（）]/g, "")
     .replace(/[ぁ-ん]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60)); // ひらがな→カタカナ
 }
+function sanitizePlayerName(value) {
+  return (value || "").replace(/[^A-Za-z]/g, "").slice(0, 6).toUpperCase();
+}
 function shuffle(a) { const x = [...a]; for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; } return x; }
 
 function show(id) {
@@ -712,7 +715,15 @@ document.addEventListener("DOMContentLoaded", () => {
   $("btn-ranking").onclick = () => showRanking();
   $("btn-show-ranking").onclick = () => showRanking(S.lastBoard);
   $("btn-ranking-back").onclick = () => show("screen-home");
-  $("player-name").addEventListener("input", e => { e.target.value = e.target.value.replace(/[^A-Za-z]/g, "").toUpperCase(); });
+  const playerName = $("player-name");
+  playerName.addEventListener("input", () => {
+    const sanitized = sanitizePlayerName(playerName.value);
+    if (sanitized !== playerName.value) playerName.value = sanitized;
+  });
+  playerName.addEventListener("keydown", e => {
+    if (e.key === "Backspace" || e.key === "Delete" || e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Tab") return;
+    if (e.key.length !== 1 || !/^[A-Za-z]$/.test(e.key)) e.preventDefault();
+  });
   $("btn-save-score").onclick = async () => {
     const name = $("player-name").value;
     if (!name) return;
