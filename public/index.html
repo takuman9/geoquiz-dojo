@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GeoQuiz Dojo - 国当てクイズ</title>
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== ホーム画面 ===== -->
+<section id="screen-home" class="screen active">
+  <header class="home-header">
+    <div class="lang-switch">
+      <select id="lang-select" aria-label="Language"></select>
+    </div>
+    <h1><span class="globe">🌍</span> <span id="title-text" data-i18n="title">国当てクイズ</span></h1>
+    <p class="subtitle" data-i18n="subtitle">ヒントから国を当てよう!</p>
+  </header>
+
+  <button id="btn-start" class="primary-btn big" data-i18n="start">クイズスタート</button>
+  <p id="current-setting" class="current-setting"></p>
+
+  <details id="settings-details" class="settings-details">
+    <summary data-i18n="details">詳細選択</summary>
+    <div class="settings">
+      <div class="setting-group">
+        <label data-i18n="mode">モード</label>
+        <div class="btn-row" id="mode-select">
+          <button class="opt-btn" data-value="normal" data-i18n="modeNormal">通常(入力)</button>
+          <button class="opt-btn active" data-value="easy" data-i18n="modeEasy">イージー(4択)</button>
+        </div>
+      </div>
+      <div class="setting-group">
+        <label data-i18n="numQuestions">出題数</label>
+        <div class="btn-row" id="count-select">
+          <button class="opt-btn active" data-value="10">10</button>
+          <button class="opt-btn" data-value="30">30</button>
+          <button class="opt-btn" data-value="50">50</button>
+          <button class="opt-btn" data-value="survival" data-i18n="survival">サバイバル</button>
+        </div>
+      </div>
+      <div class="setting-group">
+        <label data-i18n="audienceLabel">対象</label>
+        <div class="btn-row" id="audience-select">
+          <button class="opt-btn" data-value="general" data-i18n="audGeneral">一般向け</button>
+          <button class="opt-btn active" data-value="kids" data-i18n="audKids">子ども向け</button>
+        </div>
+      </div>
+      <div class="setting-group">
+        <label data-i18n="themeLabel">ヒントのテーマ</label>
+        <div class="btn-row" id="theme-select">
+          <button class="opt-btn active" data-value="all" data-i18n="themeAll">おまかせ</button>
+          <button class="opt-btn" data-value="sports" data-i18n="themeSports">スポーツ</button>
+          <button class="opt-btn" data-value="food" data-i18n="themeFood">食文化</button>
+          <button class="opt-btn" data-value="history" data-i18n="themeHistory">歴史</button>
+          <button class="opt-btn" data-value="nature" data-i18n="themeNature">地理・自然</button>
+          <button class="opt-btn" data-value="culture" data-i18n="themeCulture">文化・芸術</button>
+        </div>
+      </div>
+      <div class="setting-group">
+        <label data-i18n="regionLabel">出題範囲</label>
+        <div class="btn-row" id="region-select">
+          <button class="opt-btn active" data-value="all" data-i18n="regionAll">全世界</button>
+          <button class="opt-btn" data-value="Asia" data-i18n="regionAsia">アジア</button>
+          <button class="opt-btn" data-value="Europe" data-i18n="regionEurope">ヨーロッパ</button>
+          <button class="opt-btn" data-value="Africa" data-i18n="regionAfrica">アフリカ</button>
+          <button class="opt-btn" data-value="Americas" data-i18n="regionAmericas">南北アメリカ</button>
+          <button class="opt-btn" data-value="Oceania" data-i18n="regionOceania">オセアニア</button>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <button id="btn-ranking" class="secondary-btn" data-i18n="showRanking">ハイスコアランキング</button>
+  <p id="api-status" class="api-status"></p>
+  <p class="ai-notice" data-i18n="aiNotice">⚠️ 問題は生成AIが作成しています。不正確な内容が含まれる場合があります。</p>
+</section>
+
+<!-- ===== ゲーム画面 ===== -->
+<section id="screen-game" class="screen">
+  <header class="game-header">
+    <span id="q-progress">Q1</span>
+    <span id="score-display">0</span>
+    <span id="lives-display"></span>
+  </header>
+
+  <!-- 日めくりヒントカード -->
+  <div class="calendar-stack" id="calendar-stack">
+    <div class="calendar-card" id="card-under">
+      <div class="card-ring"></div>
+      <div class="card-label" id="under-label"></div>
+      <div class="card-text" id="under-text"></div>
+    </div>
+    <div class="calendar-card" id="card-top">
+      <div class="card-ring"></div>
+      <div class="card-label" id="top-label"></div>
+      <div class="card-text" id="top-text"></div>
+    </div>
+  </div>
+
+  <div class="hint-nav">
+    <button id="btn-hint-prev" class="hint-arrow" aria-label="previous hint">◀</button>
+    <div class="hint-dots" id="hint-dots"><span class="dot on cur"></span><span class="dot"></span><span class="dot"></span></div>
+    <button id="btn-hint-next" class="hint-arrow" aria-label="next hint">▶</button>
+  </div>
+
+  <!-- 通常モード: 入力 -->
+  <div id="answer-input-area" class="answer-area">
+    <input type="text" id="answer-input" autocomplete="off" data-i18n-placeholder="inputPlaceholder" placeholder="国名を入力...">
+    <div id="suggest-list" class="suggest-list"></div>
+    <div class="btn-row">
+      <button id="btn-answer" class="primary-btn" data-i18n="answer">回答する</button>
+      <button id="btn-next-hint" class="secondary-btn" data-i18n="nextHint">次のヒント</button>
+    </div>
+  </div>
+
+  <!-- イージーモード: 4択 -->
+  <div id="answer-choice-area" class="answer-area hidden">
+    <div class="choice-grid" id="choice-grid"></div>
+    <button id="btn-next-hint-easy" class="secondary-btn" data-i18n="nextHint">次のヒント</button>
+  </div>
+
+  <p id="judge-msg" class="judge-msg"></p>
+  <button id="btn-giveup" class="giveup-btn" data-i18n="giveUp">ギブアップ</button>
+
+  <!-- Web検索オプション(普段は折りたたみ) -->
+  <details class="websearch">
+    <summary data-i18n="webSearch">🔍 Web検索</summary>
+    <div class="ws-row">
+      <input id="ws-input" type="text" autocomplete="off">
+      <button id="ws-go">🔍</button>
+    </div>
+    <div id="ws-results" class="ws-results hidden"></div>
+  </details>
+</section>
+
+<!-- ===== 正解表示画面 ===== -->
+<section id="screen-reveal" class="screen">
+  <h2 id="reveal-result"></h2>
+  <div id="map-container"></div>
+  <div class="reveal-info">
+    <img id="reveal-flag" alt="flag">
+    <div>
+      <h3 id="reveal-name"></h3>
+      <p id="reveal-official" class="reveal-official"></p>
+      <span id="reveal-rank" class="rank-badge"></span>
+    </div>
+  </div>
+  <p id="reveal-summary"></p>
+  <button id="btn-continue" class="primary-btn" data-i18n="nextQuestion">次の問題へ</button>
+</section>
+
+<!-- ===== 結果画面 ===== -->
+<section id="screen-result" class="screen">
+  <h2 data-i18n="gameOver">ゲーム終了!</h2>
+  <div class="result-box">
+    <p class="final-score" id="final-score">0</p>
+    <p id="result-detail"></p>
+    <p id="result-ranks"></p>
+  </div>
+  <div id="hiscore-entry" class="hiscore-entry hidden">
+    <p data-i18n="newRecord">ハイスコア登録!</p>
+    <input type="text" id="player-name" maxlength="6" data-i18n-placeholder="namePlaceholder" placeholder="名前 (英字6文字)" pattern="[A-Za-z]*">
+    <select id="player-country"></select>
+    <button id="btn-save-score" class="primary-btn" data-i18n="register">登録</button>
+  </div>
+  <p id="save-confirm" class="save-confirm hidden"></p>
+
+  <!-- 問題・ヒントへのフィードバック(👎はAIが自動で作り直し) -->
+  <div id="feedback-area" class="feedback-area hidden">
+    <h3 data-i18n="feedbackTitle">問題へのフィードバック</h3>
+    <p class="feedback-note" data-i18n="feedbackNote">👎のついたヒントはAIが自動で作り直します</p>
+    <div id="fb-list" class="fb-list"></div>
+  </div>
+
+  <button id="btn-show-ranking" class="secondary-btn" data-i18n="showRanking">ランキングを見る</button>
+  <button id="btn-home" class="primary-btn" data-i18n="backHome">ホームに戻る</button>
+</section>
+
+<!-- ===== ランキング画面 ===== -->
+<section id="screen-ranking" class="screen">
+  <h2 data-i18n="rankingTitle">🏆 ハイスコアランキング</h2>
+  <div class="btn-row rk-tabs">
+    <button id="rk-tab-quiz" class="opt-btn active" data-i18n="quizMode">クイズ</button>
+    <button id="rk-tab-survival" class="opt-btn" data-i18n="survival">サバイバル</button>
+  </div>
+  <ol id="ranking-list" class="ranking-list"></ol>
+  <button id="btn-ranking-back" class="primary-btn" data-i18n="backHome">ホームに戻る</button>
+</section>
+
+<!-- モード選択ポップアップ -->
+<div id="mode-modal" class="modal hidden">
+  <div class="modal-box">
+    <h3 data-i18n="chooseMode">モードを選択</h3>
+    <button id="pick-quiz" class="mode-card">
+      <span class="mode-card-title">🗺️ <span data-i18n="quizMode">クイズ</span></span>
+      <span class="mode-card-desc" data-i18n="quizDesc">決まった問題数(10/30/50問)を最後まで解くモード。ライフはなく、間違えても何度でも挑戦できます。</span>
+    </button>
+    <button id="pick-survival" class="mode-card">
+      <span class="mode-card-title">🔥 <span data-i18n="survival">サバイバル</span></span>
+      <span class="mode-card-desc" data-i18n="survivalDesc">ライフ3つでスタート。間違い・ギブアップで1ミス。ライフが尽きるまで解き続けてハイスコアを狙え!</span>
+    </button>
+    <button id="modal-cancel" class="secondary-btn" data-i18n="close">閉じる</button>
+  </div>
+</div>
+
+<div id="loading-overlay" class="hidden">
+  <div class="orbit"><span class="orbit-globe">🌍</span></div>
+  <p class="load-title" data-i18n="title">国当てクイズ</p>
+  <p class="load-sub" data-i18n="generating">読み込み中...</p>
+</div>
+
+<script src="vendor/d3.min.js"></script>
+<script src="vendor/topojson-client.min.js"></script>
+<script src="data/countries.js"></script>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

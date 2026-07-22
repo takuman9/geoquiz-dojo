@@ -1,0 +1,11 @@
+# gcloud run deploy --source . のアップロード除外設定
+# ※ファイル名は「.gcloudignore」(eなし)。誤字ると無視され .gitignore が流用されるので注意。
+#   .env を同梱する方式(手順3A)のために、ここでは .env を除外していない。
+#   Secret Manager方式(手順3B)を使う場合は下の「#.env」の行頭#を外すこと。
+node_modules/
+ranking.json
+.git/
+.gitignore
+.DS_Store
+._*
+#.env

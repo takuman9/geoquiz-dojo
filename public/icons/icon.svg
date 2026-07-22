@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- GeoQuiz Dojo icon: 地球儀 + クエスチョンマーク -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e3a5f"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <radialGradient id="globe" cx="0.35" cy="0.3" r="1">
+      <stop offset="0" stop-color="#7dd3fc"/>
+      <stop offset="0.55" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#0369a1"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- 地球 -->
+  <circle cx="225" cy="285" r="152" fill="url(#globe)"/>
+  <!-- 経線・緯線 -->
+  <g fill="none" stroke="#0c4a6e" stroke-width="7" opacity="0.55">
+    <ellipse cx="225" cy="285" rx="152" ry="152"/>
+    <ellipse cx="225" cy="285" rx="70" ry="152"/>
+    <line x1="73" y1="285" x2="377" y2="285"/>
+    <path d="M 94 209 A 190 190 0 0 1 356 209"/>
+    <path d="M 94 361 A 190 190 0 0 0 356 361"/>
+  </g>
+  <!-- 大陸 -->
+  <g fill="#34d399">
+    <path d="M 150 200 q 30 -28 62 -16 q 34 12 22 40 q -10 24 -40 22 q -14 -2 -22 12 q -8 16 -26 10 q -22 -8 -18 -34 q 4 -22 22 -34 z"/>
+    <path d="M 250 300 q 26 -10 44 6 q 18 16 8 38 q -8 20 -28 26 q -18 6 -26 -10 q -6 -12 -14 -20 q -12 -14 0 -26 q 8 -8 16 -14 z"/>
+    <path d="M 130 330 q 18 -4 26 10 q 8 16 -4 28 q -14 12 -28 2 q -14 -12 -8 -26 q 4 -10 14 -14 z"/>
+  </g>
+  <!-- 地球のハイライト -->
+  <ellipse cx="172" cy="212" rx="52" ry="30" fill="#ffffff" opacity="0.22" transform="rotate(-28 172 212)"/>
+
+  <!-- クエスチョンマーク(縁取り+本体) -->
+  <g fill="none" stroke-linecap="round">
+    <g stroke="#0f172a" stroke-width="86">
+      <path d="M 302 148 A 62 62 0 1 1 364 220 L 364 252"/>
+    </g>
+    <g stroke="#f59e0b" stroke-width="56">
+      <path d="M 302 148 A 62 62 0 1 1 364 220 L 364 252"/>
+    </g>
+  </g>
+  <circle cx="364" cy="330" r="42" fill="#0f172a"/>
+  <circle cx="364" cy="330" r="28" fill="#f59e0b"/>
+</svg>
